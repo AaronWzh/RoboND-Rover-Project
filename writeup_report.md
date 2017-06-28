@@ -42,11 +42,17 @@ You're reading it!
 In  `perception_step()`, I created three functions  `color_thresh()`,  `color_thresh_obstacles()`,  `color_thresh_rocks()` to detect navigation, obstavles, rocks respectively. In `color_thresh()`,  `color_thresh_obstacles()`, I use RGB filter as described in the sample. In `color_thresh_rocks()`, I use HSV to get a more robut filter to detect yellow rocks. I also implemented Morphology Transformations to filter some noise. It works better for path finding and obstales detection, but for rocks detection, it doesn't matter so much.
 
 Warped image of one frame with rocks:
+
 ![alt text][image1]
+
 Navigation, obstavles, rocks filter images:
+
 ![alt text][image2]
+
 Steering model for one random image from dataset:
+
 ![alt text][image3]
+
 
 #### 2. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
 
