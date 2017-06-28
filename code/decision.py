@@ -31,28 +31,31 @@ def decision_step(Rover):
                     # Set mode to "stop" and hit the brakes!
                     Rover.throttle = 0
                     # Set brake to stored brake value
-                    Rover.brake = Rover.brake_set
+                    Rover.brake = Rover.brake_set*(1 - len(Rover.nav_angles)/Rover.stop_forward)
                     Rover.steer = 0
                     Rover.mode = 'stop'
 
         # If we're already in "stop" mode then make different decisions
         elif Rover.mode == 'stop':
             # If we're in stop mode but still moving keep braking
-            if Rover.vel > 0.2:
+            if Rover.vel > 0.15:
                 Rover.throttle = 0
-                Rover.brake = Rover.brake_set
+                Rover.brake = Rover.brake_set*1.5*(1 - 0.2/Rover.vel)
                 Rover.steer = 0
+                print('stop brake')
             # If we're not moving (vel < 0.2) then do something else
-            elif Rover.vel <= 0.2:
+            elif Rover.vel <= 0.15:
                 # Now we're stopped and we have vision data to see if there's a path forward
                 if len(Rover.nav_angles) < Rover.go_forward:
                     Rover.throttle = 0
                     # Release the brake to allow turning
                     Rover.brake = 0
                     # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
-                    Rover.steer = -15 # Could be more clever here about which way to turn
+                    Rover.steer = Rover.turn_count*(5 + np.random.randint(0, 5)) # Could be more clever here about which way to turn
+                    print('turn')
                 # If we're stopped but see sufficient navigable terrain in front then go!
-                if len(Rover.nav_angles) >= Rover.go_forward:
+                if (len(Rover.nav_angles) >= Rover.go_forward) and (Rover.stop_front_thresh > 50):
+                    Rover.turn_count *= -1
                     # Set throttle back to stored value
                     Rover.throttle = Rover.throttle_set
                     # Release the brake
@@ -60,6 +63,7 @@ def decision_step(Rover):
                     # Set steer to mean angle
                     Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
                     Rover.mode = 'forward'
+                    print('change to forward')
     # Just to make the rover do something 
     # even if no modifications have been made to the code
     else:

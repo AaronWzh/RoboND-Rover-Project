@@ -53,15 +53,15 @@ class RoverState():
         self.nav_dists = None # Distances of navigable terrain pixels
         self.ground_truth = ground_truth_3d # Ground truth worldmap
         self.mode = 'forward' # Current mode (can be forward or stop)
-        self.throttle_set = 0.2 # Throttle setting when accelerating
-        self.brake_set = 10 # Brake setting when braking
+        self.throttle_set = 0.25 # Throttle setting when accelerating
+        self.brake_set = 18 # Brake setting when braking
         # The stop_forward and go_forward fields below represent total count
         # of navigable terrain pixels.  This is a very crude form of knowing
         # when you can keep going and when you should stop.  Feel free to
         # get creative in adding new fields or modifying these!
-        self.stop_forward = 50 # Threshold to initiate stopping
+        self.stop_forward = 100 # Threshold to initiate stopping
         self.go_forward = 500 # Threshold to go forward again
-        self.max_vel = 2 # Maximum velocity (meters/second)
+        self.max_vel = 3 # Maximum velocity (meters/second)
         # Image output from perception step
         # Update this image to display your intermediate analysis steps
         # on screen in autonomous mode
@@ -76,6 +76,11 @@ class RoverState():
         self.near_sample = 0 # Will be set to telemetry value data["near_sample"]
         self.picking_up = 0 # Will be set to telemetry value data["picking_up"]
         self.send_pickup = False # Set to True to trigger rock pickup
+
+        self.M = None
+        self.dst_size = None
+        self.turn_count = 1
+        self.stop_front_thresh = 40
 # Initialize our rover 
 Rover = RoverState()
 
@@ -85,6 +90,30 @@ frame_counter = 0
 # Initalize second counter
 second_counter = time.time()
 fps = None
+
+
+
+# Calibration for M matrix
+
+# 1) Define source and destination points for perspective transform
+# These source and destination points are defined to warp the image
+# to a grid where each 10x10 pixel square represents 1 square meter
+# The destination box will be 2*dst_size on each side
+dst_size = 5 
+# Set a bottom offset to account for the fact that the bottom of the image 
+# is not the position of the rover but a bit in front of it
+# this is just a rough guess, feel free to change it!
+bottom_offset = 6
+source = np.float32([[14, 140], [301 ,140],[200, 96], [118, 96]])
+example_grid = '../calibration_images/example_grid1.jpg'
+image = mpimg.imread(example_grid)
+destination = np.float32([[image.shape[1]/2 - dst_size, image.shape[0] - bottom_offset],
+                  [image.shape[1]/2 + dst_size, image.shape[0] - bottom_offset],
+                  [image.shape[1]/2 + dst_size, image.shape[0] - 2*dst_size - bottom_offset], 
+                  [image.shape[1]/2 - dst_size, image.shape[0] - 2*dst_size - bottom_offset],
+                  ])
+Rover.M = cv2.getPerspectiveTransform(source, destination)
+Rover.dst_size = dst_size
 
 
 # Define telemetry function for what to do with incoming data
