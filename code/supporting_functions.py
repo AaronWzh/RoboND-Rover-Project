@@ -47,8 +47,8 @@ def update_rover(Rover, data):
       Rover.near_sample = np.int(data["near_sample"])
       # Picking up flag
       Rover.picking_up = np.int(data["picking_up"])
-      # Update number of rocks found
-      Rover.samples_found = Rover.samples_to_find - np.int(data["sample_count"])
+      # Update number of rocks collected
+      Rover.samples_collected = Rover.samples_to_find - np.int(data["sample_count"])
 
       # print('speed =',Rover.vel, 'position =', Rover.pos, 'throttle =', 
       # Rover.throttle, 'steer_angle =', Rover.steer, 'near_sample:', Rover.near_sample, 
@@ -56,10 +56,10 @@ def update_rover(Rover, data):
       # 'total time:', Rover.total_time, 'samples remaining:', data["sample_count"], 
       # 'samples found:', Rover.samples_found)
      
-      # try:
-      #       print('speed =',Rover.vel, 'steer_angle =', Rover.steer, 'mean_dist=',np.mean(Rover.nav_dists),'stop_front_thresh=',Rover.stop_front_thresh)
-      # except:
-      #       pass
+      try:
+            print('speed =',Rover.vel, 'steer_angle =', Rover.steer, 'mean_dist=',np.mean(Rover.nav_dists),'stop_front_thresh=',Rover.stop_front_thresh)
+      except:
+            pass
 
       # Get the current image from the center camera of the rover
       imgString = data["image"]
@@ -97,7 +97,9 @@ def create_output_images(Rover):
       rock_world_pos = Rover.worldmap[:,:,1].nonzero()
       # If there are, we'll step through the known sample positions
       # to confirm whether detections are real
+      samples_located = 0
       if rock_world_pos[0].any():
+            
             rock_size = 2
             for idx in range(len(Rover.samples_pos[0])):
                   test_rock_x = Rover.samples_pos[0][idx]
@@ -108,6 +110,7 @@ def create_output_images(Rover):
                   # consider it a success and plot the location of the known
                   # sample on the map
                   if np.min(rock_sample_dists) < 3:
+                        samples_located += 1
                         map_add[test_rock_y-rock_size:test_rock_y+rock_size, 
                         test_rock_x-rock_size:test_rock_x+rock_size, :] = 255
 
@@ -137,9 +140,12 @@ def create_output_images(Rover):
                   cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
       cv2.putText(map_add,"Fidelity: "+str(fidelity)+'%', (0, 40), 
                   cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
-      cv2.putText(map_add,"Rocks: "+str(Rover.samples_found), (0, 55), 
+      cv2.putText(map_add,"Rocks", (0, 55), 
                   cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
-
+      cv2.putText(map_add,"  Located: "+str(samples_located), (0, 70), 
+                  cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+      cv2.putText(map_add,"  Collected: "+str(Rover.samples_collected), (0, 85), 
+                  cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
       # Convert map and vision image to base64 strings for sending to server
       pil_img = Image.fromarray(map_add.astype(np.uint8))
       buff = BytesIO()
