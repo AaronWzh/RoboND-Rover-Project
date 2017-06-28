@@ -41,10 +41,11 @@ You're reading it!
 #### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
 In  `perception_step()`, I created three functions  `color_thresh()`,  `color_thresh_obstacles()`,  `color_thresh_rocks()` to detect navigation, obstavles, rocks respectively. In `color_thresh()`,  `color_thresh_obstacles()`, I use RGB filter as described in the sample. In `color_thresh_rocks()`, I use HSV to get a more robut filter to detect yellow rocks. I also implemented Morphology Transformations to filter some noise. It works better for path finding and obstales detection, but for rocks detection, it doesn't matter so much.
 
-Here is an example of how to include an image in your writeup.
-
+Warped image of one frame with rocks:
 ![alt text][image1]
+Navigation, obstavles, rocks filter images:
 ![alt text][image2]
+Steering model for one random image from dataset:
 ![alt text][image3]
 
 #### 2. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
@@ -76,8 +77,4 @@ I also modified decision making tree, introducing `Rover.stop_front_thresh` to m
 I use 1024x768 resolution and fastest graphic quality option. FPS is 18.
  
 The rover achieved at least 70% of the environment with 65% fidelity (accuracy) against the ground truth and is able to find the location of at least one rock sample. Sometimes the rover can't find a road with a narrow entrance, and collision could still happen in the middle area when there are some small rock obstacles. To solve these issues, next step I will tune the parameters to make a better throttle and brake mode, and advanced opencv method in stead of  `to_polar_coords()` method we use would make the small rock obstacles easier to detect and avoid. For the road with a narrow entrance, search algorithm would fix that, which will be left for next step.
-
-
-![alt text][image3]
-
 
